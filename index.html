@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demon Slayer: Soul Roll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+      body {
+        margin: 0;
+        background-color: #020202;
+        color: #e5e5e5;
+        font-family: 'Inter', sans-serif;
+        overflow: hidden;
+      }
+      .font-cinzel { font-family: 'Cinzel', serif; }
+      
+      .bg-demon-gradient {
+        background: radial-gradient(circle at center, #1a0505 0%, #020202 100%);
+      }
+
+      /* Pixelated Rendering */
+      .pixelated {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+
+      /* Retro Sprite Styling */
+      .sprite-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Simple CSS Pixel Character: Player */
+      .pixel-player-body {
+        width: 64px;
+        height: 96px;
+        background: #111;
+        position: relative;
+        border: 4px solid #fff;
+        box-shadow: 4px 4px 0 #000;
+        z-index: 10;
+      }
+      .pixel-player-head {
+        width: 32px;
+        height: 32px;
+        background: #f1c27d;
+        position: absolute;
+        top: -36px;
+        left: 12px;
+        border: 4px solid #fff;
+      }
+      .pixel-player-sword {
+        width: 8px;
+        height: 80px;
+        background: #eee;
+        position: absolute;
+        right: -16px;
+        bottom: 20px;
+        border: 2px solid #fff;
+        transform: rotate(15deg);
+        box-shadow: 2px 2px 0 #000;
+      }
+
+      /* Small Pixel Hashira */
+      .pixel-hashira-body {
+        width: 32px;
+        height: 48px;
+        position: absolute;
+        border: 2px solid #fff;
+        box-shadow: 2px 2px 0 #000;
+        z-index: 5;
+        transition: transform 0.2s ease-out;
+      }
+      .pixel-hashira-head {
+        width: 16px;
+        height: 16px;
+        background: #f1c27d;
+        position: absolute;
+        top: -18px;
+        left: 6px;
+        border: 2px solid #fff;
+      }
+
+      /* Simple CSS Pixel Character: Demon */
+      .pixel-demon-body {
+        width: 120px;
+        height: 180px;
+        background: #300;
+        position: relative;
+        border: 6px solid #f00;
+        box-shadow: 6px 6px 0 #000;
+        overflow: hidden;
+      }
+      .pixel-demon-head {
+        width: 60px;
+        height: 60px;
+        background: #100;
+        position: absolute;
+        top: -40px;
+        left: 24px;
+        border: 6px solid #f00;
+      }
+      .pixel-demon-eye {
+        width: 12px;
+        height: 12px;
+        background: #ff0;
+        position: absolute;
+        top: 20px;
+        box-shadow: 0 0 10px #ff0;
+      }
+
+      /* Animations */
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      .animate-float { animation: float 3s ease-in-out infinite; }
+
+      @keyframes shake {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
+      }
+      .animate-shake { animation: shake 0.1s infinite; }
+
+      @keyframes water-flow {
+        0% { transform: translateX(0) translateY(0) scaleY(1); opacity: 0.3; }
+        50% { transform: translateX(-15%) translateY(10px) scaleY(1.1); opacity: 0.6; }
+        100% { transform: translateX(0) translateY(0) scaleY(1); opacity: 0.3; }
+      }
+      .animate-water { animation: water-flow 10s ease-in-out infinite; }
+
+      @keyframes flame-flow {
+        0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0; filter: blur(2px); }
+        20% { opacity: 0.8; filter: blur(0px); }
+        100% { transform: translateY(-300px) scale(2) rotate(45deg); opacity: 0; filter: blur(8px); }
+      }
+      .particle-flame { animation: flame-flow 1.5s ease-out infinite; position: absolute; border-radius: 50% 50% 0 0; background: linear-gradient(to top, #ff2200, #ffae00, transparent); box-shadow: 0 0 30px #ff4500; }
+
+      .bg-layer {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      .rarity-mythic { color: #ef4444; text-shadow: 0 0 30px #ef4444, 0 0 60px #ef4444; }
+      .rarity-legendary { color: #eab308; text-shadow: 0 0 25px #eab308; }
+      .rarity-godly { 
+        color: #fff; 
+        text-shadow: 0 0 10px #fff, 0 0 20px #eab308, 0 0 40px #eab308, 0 0 80px #eab308;
+        animation: godly-shimmer 2s infinite alternate;
+      }
+      @keyframes godly-shimmer {
+        0% { filter: brightness(1); }
+        100% { filter: brightness(1.8); }
+      }
+
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      .attack-flash {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 0, 0, 0.15);
+        pointer-events: none;
+        z-index: 50;
+        opacity: 0;
+        transition: opacity 0.1s;
+      }
+      .attack-flash.visible {
+        opacity: 1;
+      }
+
+      /* Star Wars Crawl Cutscene */
+      .star-wars-container {
+        display: flex;
+        justify-content: center;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        background-color: black;
+        overflow: hidden;
+        perspective: 400px;
+      }
+      .star-wars-crawl {
+        position: relative;
+        top: 9999px;
+        transform-origin: 50% 100%;
+        animation: crawl 40s linear forwards;
+      }
+      .star-wars-content {
+        text-align: center;
+        color: #ffc908;
+        font-family: 'Cinzel', serif;
+        font-weight: 900;
+        text-transform: uppercase;
+        width: 600px;
+      }
+      @keyframes crawl {
+        0% { top: 400px; transform: rotateX(25deg) translateZ(0); }
+        100% { top: -4000px; transform: rotateX(25deg) translateZ(-2500px); }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
